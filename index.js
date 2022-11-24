@@ -21,6 +21,9 @@ const client = new MongoClient(uri, {
 const dbRunner = async () => {
   try {
     const userCollection = client.db(process.env.DB_NAME).collection("users");
+    const bookingCollection = client
+      .db(process.env.DB_NAME)
+      .collection("booking");
     const productsCollection = client
       .db(process.env.DB_NAME)
       .collection("products");
@@ -63,6 +66,17 @@ const dbRunner = async () => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await productsCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.post("/booking", async (req, res) => {
+      const bookedData = req.body;
+      const result = await bookingCollection.insertOne(bookedData);
+      res.send(result);
+    });
+    app.get("/booking", async (req, res) => {
+      const query = {};
+      const result = await bookingCollection.find(query).toArray();
       res.send(result);
     });
     console.log("connection is runnig");
