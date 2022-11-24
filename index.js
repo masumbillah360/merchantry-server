@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 
@@ -21,6 +21,9 @@ const client = new MongoClient(uri, {
 const dbRunner = async () => {
   try {
     const userCollection = client.db(process.env.DB_NAME).collection("users");
+    const productsCollection = client
+      .db(process.env.DB_NAME)
+      .collection("products");
     const categoryCollection = client
       .db(process.env.DB_NAME)
       .collection("categories");
@@ -38,11 +41,28 @@ const dbRunner = async () => {
       res.send(result);
       console.log("users");
     });
+    app.get("/categories", async (req, res) => {
+      const query = {};
+      const result = await categoryCollection.find(query).toArray();
+      res.send(result);
+    });
     app.get("/categories/:category", async (req, res) => {
       const category = req.params.category;
       console.log(category);
       const query = { cat_id: category };
-      const result = await categoryCollection.find(query).toArray();
+      const result = await productsCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.get("/products", async (req, res) => {
+      const query = {};
+      const result = await productsCollection.find(query).toArray();
+      res.send(result);
+    });
+    app.get("/products/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await productsCollection.findOne(query);
       res.send(result);
     });
     console.log("connection is runnig");
