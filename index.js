@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
+const stripe = require("stripe")(process.env.STRIPE_KEY);
 const jwt = require("jsonwebtoken");
 
 const app = express();
@@ -11,7 +12,6 @@ const port = process.env.PORT || 8000;
 // middleware
 app.use(cors());
 app.use(express.json());
-
 const uri = `mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASS}@cluster0.pwgovse.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
@@ -21,6 +21,9 @@ const client = new MongoClient(uri, {
 const dbRunner = async () => {
   try {
     const userCollection = client.db(process.env.DB_NAME).collection("users");
+    const paymentCollection = client
+      .db(process.env.DB_NAME)
+      .collection("payments");
     const whishlistCollection = client
       .db(process.env.DB_NAME)
       .collection("wishlist");
@@ -116,6 +119,37 @@ const dbRunner = async () => {
     app.get("/wishlist", async (req, res) => {
       const query = {};
       const result = await whishlistCollection.find(query).toArray();
+      res.send(result);
+    });
+    app.post("/create-payment-intent", async (req, res) => {
+      const booking = req.body;
+      console.log(booking);
+      const price = booking.price;
+      const amount = price * 100;
+      const paymentIntent = await stripe.paymentIntents.create({
+        currency: "usd",
+        amount: amount,
+        payment_method_types: ["card"],
+      });
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
+    });
+    app.post("/payments", async (req, res) => {
+      const payment = req.body;
+      console.log(payment);
+      const productId = payment.productId;
+      console.log(productId);
+      const result = await paymentCollection.insertOne(payment);
+      const filter = { _id: ObjectId(productId) };
+      const updatedDoc = {
+        $set: {
+          paid: true,
+          transactionId: payment.transactionId,
+        },
+      };
+      const updated = await productsCollection.updateOne(filter, updatedDoc);
+      console.log(updated);
       res.send(result);
     });
     console.log("connection is runnig");
