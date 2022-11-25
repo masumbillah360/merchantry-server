@@ -4,6 +4,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const stripe = require("stripe")(process.env.STRIPE_KEY);
 const jwt = require("jsonwebtoken");
+const { query } = require("express");
 
 const app = express();
 // port
@@ -91,6 +92,14 @@ const dbRunner = async () => {
 
     app.post("/booking", async (req, res) => {
       const bookedData = req.body;
+      const productsName = bookedData.name;
+      const query = { name: productsName };
+      const prevData = await bookingCollection.findOne(query);
+      if (prevData) {
+        res.send({ status: "Already Booked" });
+        return;
+      }
+      console.log(bookedData);
       const result = await bookingCollection.insertOne(bookedData);
       res.send(result);
     });
@@ -116,9 +125,17 @@ const dbRunner = async () => {
       const result = await whishlistCollection.insertOne(data);
       res.send(result);
     });
+
     app.get("/wishlist", async (req, res) => {
       const query = {};
       const result = await whishlistCollection.find(query).toArray();
+      res.send(result);
+    });
+    app.delete("/wishlist/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id, "whishlist");
+      const filter = { _id: ObjectId(id) };
+      const result = await whishlistCollection.deleteOne(filter);
       res.send(result);
     });
     app.get("/orders", async (req, res) => {
