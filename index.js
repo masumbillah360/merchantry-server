@@ -199,6 +199,12 @@ const dbRunner = async () => {
       const result = await sellersProductsCollection.insertOne(data);
       res.send(result);
     });
+    app.get("/sellers-product", async (req, res) => {
+      const email = req.query.email;
+      const query = {};
+      const result = await sellersProductsCollection.insertOne(data);
+      res.send(result);
+    });
     console.log("connection is runnig");
   } catch (error) {}
 };
