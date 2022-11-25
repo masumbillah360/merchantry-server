@@ -22,6 +22,9 @@ const client = new MongoClient(uri, {
 const dbRunner = async () => {
   try {
     const userCollection = client.db(process.env.DB_NAME).collection("users");
+    const sellersProductsCollection = client
+      .db(process.env.DB_NAME)
+      .collection("sellersProducts");
     const paymentCollection = client
       .db(process.env.DB_NAME)
       .collection("payments");
@@ -182,10 +185,18 @@ const dbRunner = async () => {
       console.log(updated);
       res.send(result);
     });
-    app.get("payments", async (req, res) => {
+    app.get("/payments", async (req, res) => {
       const email = req.query.email;
       const query = { userEmail: email };
-      const result = paymentCollection.find(query).toArray();
+      const result = await paymentCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // seller section
+
+    app.post("/sellers-product", async (req, res) => {
+      const data = req.body;
+      const result = await sellersProductsCollection.insertOne(data);
       res.send(result);
     });
     console.log("connection is runnig");
