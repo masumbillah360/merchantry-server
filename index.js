@@ -78,9 +78,9 @@ const dbRunner = async () => {
     });
 
     app.get("/products", async (req, res) => {
-      const query = {};
-      const result = await productsCollection.find(query).toArray();
-      res.send(result);
+      const query = { paid: { $ne: true } };
+      const results = await productsCollection.find(query).toArray();
+      res.send(results);
     });
     app.get("/products/:id", async (req, res) => {
       const id = req.params.id;
@@ -121,11 +121,24 @@ const dbRunner = async () => {
       const result = await whishlistCollection.find(query).toArray();
       res.send(result);
     });
+    app.get("/orders", async (req, res) => {
+      const email = req.query.email;
+      const query = { userEmail: email };
+      const result = await paymentCollection.find(query).toArray();
+      res.send(result);
+    });
+    app.delete("/orders/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await paymentCollection.deleteOne(query);
+      res.send(result);
+    });
     app.post("/create-payment-intent", async (req, res) => {
       const booking = req.body;
       console.log(booking);
       const price = booking.price;
       const amount = price * 100;
+      console.log(amount + "amount");
       const paymentIntent = await stripe.paymentIntents.create({
         currency: "usd",
         amount: amount,
