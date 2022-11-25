@@ -96,6 +96,12 @@ const dbRunner = async () => {
       const result = await bookingCollection.find(query).toArray();
       res.send(result);
     });
+    app.get("/booking/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await bookingCollection.findOne(query);
+      res.send(result);
+    });
     app.delete("/booking/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
