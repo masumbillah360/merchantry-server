@@ -182,6 +182,12 @@ const dbRunner = async () => {
       console.log(updated);
       res.send(result);
     });
+    app.get("payments", async (req, res) => {
+      const email = req.query.email;
+      const query = { userEmail: email };
+      const result = paymentCollection.find(query).toArray();
+      res.send(result);
+    });
     console.log("connection is runnig");
   } catch (error) {}
 };
