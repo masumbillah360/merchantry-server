@@ -76,8 +76,14 @@ const dbRunner = async () => {
     app.get("/categories/:category", async (req, res) => {
       const category = req.params.category;
       console.log(category);
-      const query = { cat_id: category };
-      const result = await productsCollection.find(query).toArray();
+      const query = { cat_id: category, paid: { $ne: true } };
+      const sellersQuery = { category: category };
+      const globalProducts = await productsCollection.find(query).toArray();
+      const sellersProduct = await sellersProductsCollection
+        .find(sellersQuery)
+        .toArray();
+      const result = [...globalProducts, ...sellersProduct];
+
       res.send(result);
     });
 
@@ -202,7 +208,13 @@ const dbRunner = async () => {
     app.get("/sellers-product", async (req, res) => {
       const email = req.query.email;
       const query = {};
-      const result = await sellersProductsCollection.insertOne(data);
+      const result = await sellersProductsCollection.find(query).toArray();
+      res.send(result);
+    });
+    app.delete("/sellers-product/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await sellersProductsCollection.deleteOne(filter);
       res.send(result);
     });
     console.log("connection is runnig");
