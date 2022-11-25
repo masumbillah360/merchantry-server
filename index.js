@@ -21,6 +21,9 @@ const client = new MongoClient(uri, {
 const dbRunner = async () => {
   try {
     const userCollection = client.db(process.env.DB_NAME).collection("users");
+    const whishlistCollection = client
+      .db(process.env.DB_NAME)
+      .collection("wishlist");
     const bookingCollection = client
       .db(process.env.DB_NAME)
       .collection("booking");
@@ -39,10 +42,24 @@ const dbRunner = async () => {
     });
 
     app.get("/users", async (req, res) => {
-      const query = {};
-      const result = await userCollection.find(query).toArray();
-      res.send(result);
+      const userCategory = req.query.userStatus;
+      if (userCategory) {
+        console.log(userCategory);
+        const query = { status: userCategory };
+        const result = await userCollection.find(query).toArray();
+        res.send(result);
+      } else {
+        const query = {};
+        const result = await userCollection.find(query).toArray();
+        res.send(result);
+      }
       console.log("users");
+    });
+    app.get("/users/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await userCollection.findOne(query);
+      res.send(result);
     });
     app.get("/categories", async (req, res) => {
       const query = {};
@@ -77,6 +94,22 @@ const dbRunner = async () => {
     app.get("/booking", async (req, res) => {
       const query = {};
       const result = await bookingCollection.find(query).toArray();
+      res.send(result);
+    });
+    app.delete("/booking/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await bookingCollection.deleteOne(filter);
+      res.send(result);
+    });
+    app.post("/wishlist", async (req, res) => {
+      const data = req.body;
+      const result = await whishlistCollection.insertOne(data);
+      res.send(result);
+    });
+    app.get("/wishlist", async (req, res) => {
+      const query = {};
+      const result = await whishlistCollection.find(query).toArray();
       res.send(result);
     });
     console.log("connection is runnig");
