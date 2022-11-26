@@ -195,9 +195,16 @@ const dbRunner = async () => {
       };
       const updated = await productsCollection.updateOne(filter, updatedDoc);
       if (!updated.modifiedCount) {
+        const sellersUpdate = {
+          $set: {
+            paid: true,
+            status: true,
+            transactionId: payment.transactionId,
+          },
+        };
         const sellersProductUpdate = await sellersProductsCollection.updateOne(
           filter,
-          updatedDoc
+          sellersUpdate
         );
       }
       res.send(result);
