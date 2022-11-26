@@ -96,7 +96,12 @@ const dbRunner = async () => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await productsCollection.findOne(query);
-      res.send(result);
+      if (!result) {
+        const sellersProduct = await sellersProductsCollection.findOne(query);
+        res.send(sellersProduct);
+      } else {
+        res.send(result);
+      }
     });
 
     app.post("/booking", async (req, res) => {
