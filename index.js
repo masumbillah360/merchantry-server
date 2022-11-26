@@ -77,12 +77,13 @@ const dbRunner = async () => {
       const category = req.params.category;
       console.log(category);
       const query = { cat_id: category, paid: { $ne: true } };
-      const sellersQuery = { category: category };
+
       const globalProducts = await productsCollection.find(query).toArray();
       const sellersProduct = await sellersProductsCollection
-        .find(sellersQuery)
+        .find(query)
         .toArray();
       const result = [...globalProducts, ...sellersProduct];
+      console.log(sellersProduct);
 
       res.send(result);
     });
@@ -111,9 +112,9 @@ const dbRunner = async () => {
       const prevData = await bookingCollection.findOne(query);
       if (prevData) {
         res.send({ status: "Already Booked" });
+        console.log("booked");
         return;
       }
-      console.log(bookedData);
       const result = await bookingCollection.insertOne(bookedData);
       res.send(result);
     });
@@ -193,7 +194,12 @@ const dbRunner = async () => {
         },
       };
       const updated = await productsCollection.updateOne(filter, updatedDoc);
-      console.log(updated);
+      if (!updated.modifiedCount) {
+        const sellersProductUpdate = await sellersProductsCollection.updateOne(
+          filter,
+          updatedDoc
+        );
+      }
       res.send(result);
     });
     app.get("/payments", async (req, res) => {
