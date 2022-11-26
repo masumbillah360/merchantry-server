@@ -97,7 +97,16 @@ const dbRunner = async () => {
 
     app.get("/products", async (req, res) => {
       const query = { paid: { $ne: true } };
-      const results = await productsCollection.find(query).toArray();
+      const sellersProductQuery = {
+        paid: { $ne: true },
+        advertised: { $ne: true },
+      };
+      const homeProdcuts = await productsCollection.find(query).toArray();
+      const sellersProduct = await sellersProductsCollection
+        .find(sellersProductQuery)
+        .toArray();
+      const results = [...homeProdcuts, ...sellersProduct];
+      console.log(sellersProduct);
       res.send(results);
     });
     app.get("/products/:id", async (req, res) => {
