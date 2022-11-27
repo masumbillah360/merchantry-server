@@ -11,6 +11,7 @@ const port = process.env.PORT || 8000;
 // middleware
 app.use(cors());
 app.use(express.json());
+
 const jwt = require("jsonwebtoken");
 const uri = `mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASS}@cluster0.pwgovse.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
@@ -119,7 +120,7 @@ const dbRunner = async () => {
         .find(query)
         .toArray();
       const result = [...globalProducts, ...sellersProduct];
-      console.log(sellersProduct);
+      // console.log(sellersProduct);
 
       res.send(result);
     });
@@ -135,8 +136,21 @@ const dbRunner = async () => {
         .find(sellersProductQuery)
         .toArray();
       const results = [...homeProdcuts, ...sellersProduct];
-      console.log(sellersProduct);
+      // console.log(sellersProduct);
       res.send(results);
+    });
+    app.get("/buy-product/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { paid: { $ne: true } };
+      const homeProdcuts = await productsCollection.find(query).toArray();
+      const sellersProduct = await sellersProductsCollection
+        .find(query)
+        .toArray();
+      const results = [...homeProdcuts, ...sellersProduct];
+      const product = results.find((product) => product._id == id);
+      console.log(product);
+      res.send(product);
     });
     app.get("/products/:id", async (req, res) => {
       const id = req.params.id;
@@ -222,10 +236,10 @@ const dbRunner = async () => {
       const result = await paymentCollection.deleteOne(query);
       res.send(result);
     });
-    app.post("/create-payment-intent", async (req, res) => {
-      const booking = req.body;
-      console.log(booking);
-      const price = booking.price;
+    app.post("/create-payment-intent", verifyJWT, async (req, res) => {
+      const bookingData = req?.body;
+      console.log(bookingData);
+      const price = bookingData.presentPrice;
       const amount = price * 100;
       console.log(amount + "amount");
       try {
@@ -234,6 +248,7 @@ const dbRunner = async () => {
           amount: amount,
           payment_method_types: ["card"],
         });
+        console.log(paymentIntent.client_secret);
         res.send({
           clientSecret: paymentIntent.client_secret,
         });
