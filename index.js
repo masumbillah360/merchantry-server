@@ -3,8 +3,6 @@ const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const stripe = require("stripe")(process.env.STRIPE_KEY);
-const jwt = require("jsonwebtoken");
-const { query } = require("express");
 
 const app = express();
 // port
@@ -13,12 +11,37 @@ const port = process.env.PORT || 8000;
 // middleware
 app.use(cors());
 app.use(express.json());
+const jwt = require("jsonwebtoken");
 const uri = `mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASS}@cluster0.pwgovse.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
+
+const verifyJWT = async (req, res, next) => {
+  console.log("coll jwt");
+  const token = req.header("authorisation");
+  if (!token) {
+    res.status(401).send({ message: "Unauthorised access" });
+  }
+  try {
+    const selectedToken = token.split(" ")[1];
+    const user = jwt.verify(
+      selectedToken,
+      process.env.SECRET_KEY_TOKEN,
+      (err, decoded) => {
+        if (err) {
+          res.status(403).send({ message: "Invalid access" });
+        }
+        req.decoded = decoded;
+        next();
+      }
+    );
+  } catch (error) {
+    res.status(404).send({ message: "Not Found" });
+  }
+};
 const dbRunner = async () => {
   try {
     const userCollection = client.db(process.env.DB_NAME).collection("users");
@@ -40,7 +63,13 @@ const dbRunner = async () => {
     const categoryCollection = client
       .db(process.env.DB_NAME)
       .collection("categories");
-
+    app.post("/jwt", (req, res) => {
+      const email = req.body;
+      console.log(req.body);
+      console.log(email, "jwt email");
+      const token = jwt.sign(email, process.env.SECRET_KEY_TOKEN);
+      res.send({ token });
+    });
     app.post("/users", async (req, res) => {
       const user = req.body;
       const result = await userCollection.insertOne(user);
@@ -169,7 +198,7 @@ const dbRunner = async () => {
       res.send(result);
     });
 
-    app.get("/wishlist", async (req, res) => {
+    app.get("/wishlist", verifyJWT, async (req, res) => {
       const query = {};
       const result = await whishlistCollection.find(query).toArray();
       res.send(result);
