@@ -71,14 +71,14 @@ const dbRunner = async () => {
       const token = jwt.sign(email, process.env.SECRET_KEY_TOKEN);
       res.send({ token });
     });
-    app.post("/users", async (req, res) => {
+    app.post("/users", verifyJWT, async (req, res) => {
       const user = req.body;
       const result = await userCollection.insertOne(user);
       res.send(result);
       console.log("post user");
     });
 
-    app.get("/users", async (req, res) => {
+    app.get("/users", verifyJWT, async (req, res) => {
       const userCategory = req.query.userStatus;
       console.log(userCategory);
       const query = { status: userCategory };
@@ -86,13 +86,13 @@ const dbRunner = async () => {
       res.send(result);
       console.log("users");
     });
-    app.get("/users/:email", async (req, res) => {
+    app.get("/users/:email", verifyJWT, async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
       const result = await userCollection.findOne(query);
       res.send(result);
     });
-    app.put("/users/", async (req, res) => {
+    app.put("/users/", verifyJWT, async (req, res) => {
       const email = req.query.email;
       console.log(email);
       const doc = req.body;
@@ -139,7 +139,7 @@ const dbRunner = async () => {
       // console.log(sellersProduct);
       res.send(results);
     });
-    app.get("/buy-product/:id", async (req, res) => {
+    app.get("/buy-product/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       console.log(id);
       const query = { paid: { $ne: true } };
@@ -164,7 +164,7 @@ const dbRunner = async () => {
       }
     });
 
-    app.post("/booking", async (req, res) => {
+    app.post("/booking", verifyJWT, async (req, res) => {
       const bookedData = req.body;
       const productsName = bookedData.name;
       const query = { name: productsName };
@@ -177,18 +177,18 @@ const dbRunner = async () => {
       const result = await bookingCollection.insertOne(bookedData);
       res.send(result);
     });
-    app.get("/booking", async (req, res) => {
+    app.get("/booking", verifyJWT, async (req, res) => {
       const query = {};
       const result = await bookingCollection.find(query).toArray();
       res.send(result);
     });
-    app.get("/booking/:id", async (req, res) => {
+    app.get("/booking/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await bookingCollection.findOne(query);
       res.send(result);
     });
-    app.put("/booking/:id", async (req, res) => {
+    app.put("/booking/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       console.log(id, "updated Id");
       const filter = { _id: ObjectId(id) };
@@ -200,7 +200,7 @@ const dbRunner = async () => {
       const result = await bookingCollection.updateOne(filter, updatedDoc);
       res.send(result);
     });
-    app.delete("/booking/:id", async (req, res) => {
+    app.delete("/booking/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
       const result = await bookingCollection.deleteOne(filter);
@@ -224,13 +224,13 @@ const dbRunner = async () => {
       const result = await whishlistCollection.deleteOne(filter);
       res.send(result);
     });
-    app.get("/orders", async (req, res) => {
+    app.get("/orders", verifyJWT, async (req, res) => {
       const email = req.query.email;
       const query = { userEmail: email };
       const result = await paymentCollection.find(query).toArray();
       res.send(result);
     });
-    app.delete("/orders/:id", async (req, res) => {
+    app.delete("/orders/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await paymentCollection.deleteOne(query);
@@ -256,7 +256,7 @@ const dbRunner = async () => {
         res.send({ status: "Something went wrong" });
       }
     });
-    app.post("/payments", async (req, res) => {
+    app.post("/payments", verifyJWT, async (req, res) => {
       const payment = req.body;
       console.log(payment);
       const productId = payment.productId;
@@ -285,14 +285,14 @@ const dbRunner = async () => {
       }
       res.send(result);
     });
-    app.get("/payments", async (req, res) => {
+    app.get("/payments", verifyJWT, async (req, res) => {
       const email = req.query.email;
       console.log(email);
       const query = { userEmail: email };
       const result = await paymentCollection.find(query).toArray();
       res.send(result);
     });
-    app.delete("/payments/:transactionId", async (req, res) => {
+    app.delete("/payments/:transactionId", verifyJWT, async (req, res) => {
       const transactionId = req.params.transactionId;
       const query = { transactionId: transactionId };
       const result = await paymentCollection.deleteOne(query);
@@ -302,25 +302,25 @@ const dbRunner = async () => {
 
     // seller section
 
-    app.post("/sellers-product", async (req, res) => {
+    app.post("/sellers-product", verifyJWT, async (req, res) => {
       const data = req.body;
       const result = await sellersProductsCollection.insertOne(data);
       res.send(result);
     });
-    app.get("/sellers-product", async (req, res) => {
+    app.get("/sellers-product", verifyJWT, async (req, res) => {
       const email = req.query.email;
       const query = {};
       const result = await sellersProductsCollection.find(query).toArray();
       res.send(result);
     });
-    app.delete("/sellers-product/:id", async (req, res) => {
+    app.delete("/sellers-product/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
       const result = await sellersProductsCollection.deleteOne(filter);
       res.send(result);
     });
 
-    app.put("/advertised-products", async (req, res) => {
+    app.put("/advertised-products", verifyJWT, async (req, res) => {
       const id = req.query.id;
       const filter = { _id: ObjectId(id) };
       const doc = req.body;
