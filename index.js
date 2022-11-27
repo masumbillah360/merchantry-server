@@ -199,14 +199,18 @@ const dbRunner = async () => {
       const price = booking.price;
       const amount = price * 100;
       console.log(amount + "amount");
-      const paymentIntent = await stripe.paymentIntents.create({
-        currency: "usd",
-        amount: amount,
-        payment_method_types: ["card"],
-      });
-      res.send({
-        clientSecret: paymentIntent.client_secret,
-      });
+      try {
+        const paymentIntent = await stripe.paymentIntents.create({
+          currency: "usd",
+          amount: amount,
+          payment_method_types: ["card"],
+        });
+        res.send({
+          clientSecret: paymentIntent.client_secret,
+        });
+      } catch (error) {
+        res.send({ status: "Something went wrong" });
+      }
     });
     app.post("/payments", async (req, res) => {
       const payment = req.body;
@@ -239,9 +243,17 @@ const dbRunner = async () => {
     });
     app.get("/payments", async (req, res) => {
       const email = req.query.email;
+      console.log(email);
       const query = { userEmail: email };
       const result = await paymentCollection.find(query).toArray();
       res.send(result);
+    });
+    app.delete("/payments/:transactionId", async (req, res) => {
+      const transactionId = req.params.transactionId;
+      const query = { transactionId: transactionId };
+      const result = await paymentCollection.deleteOne(query);
+      res.send(result);
+      console.log(result);
     });
 
     // seller section
@@ -278,7 +290,7 @@ const dbRunner = async () => {
       );
     });
     app.get("/advertised-products", async (req, res) => {
-      const query = { advertised: true };
+      const query = { advertised: true, paid: { $ne: true } };
       const result = await sellersProductsCollection.find(query).toArray();
       res.send(result);
     });
