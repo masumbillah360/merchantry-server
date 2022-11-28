@@ -278,6 +278,15 @@ const dbRunner = async () => {
       if (sellersProduct) {
         await sellersProductsCollection.updateOne(query, updatedDoc);
       }
+      const filter = { productId: id };
+      const wishlistProducts = await whishlistCollection.findOne(filter);
+      if (wishlistProducts) {
+        await whishlistCollection.updateOne(filter, updatedDoc);
+      }
+      const bookedData = await bookingCollection.findOne(filter);
+      if (bookedData) {
+        await bookingCollection.updateOne(filter, updatedDoc);
+      }
 
       res.send(paymentResult);
     });
