@@ -71,7 +71,7 @@ const dbRunner = async () => {
       const token = jwt.sign(email, process.env.SECRET_KEY_TOKEN);
       res.send({ token });
     });
-    app.post("/users", verifyJWT, async (req, res) => {
+    app.post("/users", async (req, res) => {
       const user = req.body;
       const result = await userCollection.insertOne(user);
       res.send(result);
@@ -182,8 +182,9 @@ const dbRunner = async () => {
       const result = await bookingCollection.insertOne(bookedData);
       res.send(result);
     });
-    app.get("/booking", verifyJWT, async (req, res) => {
-      const query = {};
+    app.get("/booking", async (req, res) => {
+      const email = req.query.email;
+      const query = { userEmail: email };
       const result = await bookingCollection.find(query).toArray();
       res.send(result);
     });
@@ -231,6 +232,7 @@ const dbRunner = async () => {
     });
     app.get("/orders", verifyJWT, async (req, res) => {
       const email = req.query.email;
+      console.log(email);
       const query = { userEmail: email };
       const result = await paymentCollection.find(query).toArray();
       res.send(result);
