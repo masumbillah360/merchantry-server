@@ -173,12 +173,6 @@ const dbRunner = async () => {
       const bookedData = req.body;
       const productsName = bookedData.name;
       const query = { name: productsName };
-      const prevData = await bookingCollection.findOne(query);
-      if (prevData) {
-        res.send({ status: "Already Booked" });
-        console.log("booked");
-        return;
-      }
       const result = await bookingCollection.insertOne(bookedData);
       res.send(result);
     });
@@ -263,7 +257,7 @@ const dbRunner = async () => {
         res.send({ status: "Something went wrong" });
       }
     });
-    app.post("/payments", verifyJWT, async (req, res) => {
+    app.post("/payments", async (req, res) => {
       const payment = req.body;
       console.log(payment);
       const productId = payment.productId;
@@ -277,7 +271,8 @@ const dbRunner = async () => {
         },
       };
       const updated = await productsCollection.updateOne(filter, updatedDoc);
-      if (!updated.modifiedCount) {
+      console.log(updated);
+      if (updated.modifiedCount) {
         const sellersUpdate = {
           $set: {
             paid: true,
