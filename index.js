@@ -86,8 +86,9 @@ const dbRunner = async () => {
       res.send(result);
       console.log("users");
     });
-    app.get("/users/:email", verifyJWT, async (req, res) => {
+    app.get("/users/:email", async (req, res) => {
       const email = req.params.email;
+      console.log(email);
       const query = { email: email };
       const result = await userCollection.findOne(query);
       res.send(result);
@@ -213,7 +214,8 @@ const dbRunner = async () => {
     });
 
     app.get("/wishlist", verifyJWT, async (req, res) => {
-      const query = {};
+      const email = req.query.email;
+      const query = { userEmail: email };
       const result = await whishlistCollection.find(query).toArray();
       res.send(result);
     });
@@ -259,33 +261,25 @@ const dbRunner = async () => {
     });
     app.post("/payments", async (req, res) => {
       const payment = req.body;
-      console.log(payment);
-      const productId = payment.productId;
-      console.log(productId);
-      const result = await paymentCollection.insertOne(payment);
-      const filter = { _id: ObjectId(productId) };
+      const id = payment?.productId;
+      const paymentResult = await paymentCollection.insertOne(payment);
+      const query = { _id: ObjectId(id) };
+      const result = await productsCollection.findOne(query);
       const updatedDoc = {
         $set: {
           paid: true,
           transactionId: payment.transactionId,
         },
       };
-      const updated = await productsCollection.updateOne(filter, updatedDoc);
-      console.log(updated);
-      if (updated.modifiedCount) {
-        const sellersUpdate = {
-          $set: {
-            paid: true,
-            status: true,
-            transactionId: payment.transactionId,
-          },
-        };
-        const sellersProductUpdate = await sellersProductsCollection.updateOne(
-          filter,
-          sellersUpdate
-        );
+      if (result) {
+        await productsCollection.updateOne(query, updatedDoc);
       }
-      res.send(result);
+      const sellersProduct = await sellersProductsCollection.findOne(query);
+      if (sellersProduct) {
+        await sellersProductsCollection.updateOne(query, updatedDoc);
+      }
+
+      res.send(paymentResult);
     });
     app.get("/payments", verifyJWT, async (req, res) => {
       const email = req.query.email;
