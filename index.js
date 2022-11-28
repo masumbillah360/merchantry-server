@@ -145,28 +145,27 @@ const dbRunner = async () => {
       // console.log(sellersProduct);
       res.send(results);
     });
-    app.get("/buy-product/:id", verifyJWT, async (req, res) => {
+    app.get("/buy-product/:id", async (req, res) => {
       const id = req.params.id;
       console.log(id);
-      const query = { paid: { $ne: true } };
-      const homeProdcuts = await productsCollection.find(query).toArray();
-      const sellersProduct = await sellersProductsCollection
-        .find(query)
-        .toArray();
-      const results = [...homeProdcuts, ...sellersProduct];
-      const product = results.find((product) => product._id == id);
-      console.log(product);
-      res.send(product);
+      const query = { _id: ObjectId(id), paid: { $ne: true } };
+      const homeProdcuts = await productsCollection.findOne(query);
+      if (homeProdcuts) {
+        res.send(homeProdcuts);
+      } else {
+        const sellersProduct = await sellersProductsCollection.findOne(query);
+        res.send(sellersProduct);
+      }
     });
     app.get("/products/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await productsCollection.findOne(query);
-      if (!result) {
+      if (result) {
+        res.send(result);
+      } else {
         const sellersProduct = await sellersProductsCollection.findOne(query);
         res.send(sellersProduct);
-      } else {
-        res.send(result);
       }
     });
 
@@ -190,7 +189,7 @@ const dbRunner = async () => {
     });
     app.get("/booking/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
-      const query = { _id: ObjectId(id) };
+      const query = { productId: id };
       const result = await bookingCollection.findOne(query);
       res.send(result);
     });
