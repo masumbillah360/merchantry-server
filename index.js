@@ -88,7 +88,7 @@ const dbRunner = async () => {
     });
     app.get("/users/:email", async (req, res) => {
       const email = req.params.email;
-      console.log(email);
+      console.log(email, "email");
       const query = { email: email };
       const result = await userCollection.findOne(query);
       res.send(result);
@@ -192,10 +192,11 @@ const dbRunner = async () => {
     app.put("/booking/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       console.log(id, "updated Id");
-      const filter = { _id: ObjectId(id) };
+      const filter = { productId: id };
       const updatedDoc = {
         $set: {
           status: true,
+          paid: true,
         },
       };
       const result = await bookingCollection.updateOne(filter, updatedDoc);
@@ -314,7 +315,7 @@ const dbRunner = async () => {
     });
     app.get("/sellers-product", verifyJWT, async (req, res) => {
       const email = req.query.email;
-      const query = {};
+      const query = { userEmail: email };
       const result = await sellersProductsCollection.find(query).toArray();
       res.send(result);
     });
