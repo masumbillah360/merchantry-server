@@ -86,14 +86,15 @@ const dbRunner = async () => {
       res.send(result);
       console.log("users");
     });
-    app.get("/users/:email", async (req, res) => {
-      const email = req.params.email;
+    app.get("/users/:id", async (req, res) => {
+      const email = req.params.id;
       console.log(email, "email");
       const query = { email: email };
       const result = await userCollection.findOne(query);
       res.send(result);
+      console.log(result);
     });
-    app.put("/users/", verifyJWT, async (req, res) => {
+    app.put("/users", verifyJWT, async (req, res) => {
       const email = req.query.email;
       console.log(email);
       const doc = req.body;
@@ -181,7 +182,7 @@ const dbRunner = async () => {
       const email = req.query.email;
       const query = { userEmail: email };
       const result = await bookingCollection.find(query).toArray();
-      res.send(result);
+      res.send(result.reverse());
     });
     app.get("/booking/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
@@ -218,7 +219,7 @@ const dbRunner = async () => {
       const email = req.query.email;
       const query = { userEmail: email };
       const result = await whishlistCollection.find(query).toArray();
-      res.send(result);
+      res.send(result.reverse());
     });
     app.delete("/wishlist/:id", async (req, res) => {
       const id = req.params.id;
