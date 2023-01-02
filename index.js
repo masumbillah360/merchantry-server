@@ -6,19 +6,15 @@ const stripe = require("stripe")(process.env.STRIPE_KEY);
 
 const app = express();
 // port
-const port = process.env.PORT || 8000;
+const config_file = {
+  port: process.env.port || 8000,
+};
 
 // middleware
 app.use(cors());
 app.use(express.json());
 
 const jwt = require("jsonwebtoken");
-const uri = `mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASS}@cluster0.pwgovse.mongodb.net/?retryWrites=true&w=majority`;
-const client = new MongoClient(uri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  serverApi: ServerApiVersion.v1,
-});
 
 const verifyJWT = async (req, res, next) => {
   console.log("coll jwt");
@@ -45,25 +41,6 @@ const verifyJWT = async (req, res, next) => {
 };
 const dbRunner = async () => {
   try {
-    const userCollection = client.db(process.env.DB_NAME).collection("users");
-    const sellersProductsCollection = client
-      .db(process.env.DB_NAME)
-      .collection("sellersProducts");
-    const paymentCollection = client
-      .db(process.env.DB_NAME)
-      .collection("payments");
-    const whishlistCollection = client
-      .db(process.env.DB_NAME)
-      .collection("wishlist");
-    const bookingCollection = client
-      .db(process.env.DB_NAME)
-      .collection("booking");
-    const productsCollection = client
-      .db(process.env.DB_NAME)
-      .collection("products");
-    const categoryCollection = client
-      .db(process.env.DB_NAME)
-      .collection("categories");
     app.post("/jwt", (req, res) => {
       const email = req.body;
       console.log(req.body);
@@ -349,11 +326,12 @@ const dbRunner = async () => {
   } catch (error) {}
 };
 
+// default route
 app.get("/", (req, res) => {
   res.send("server is runnig");
 });
 
 dbRunner().catch((err) => console.log(err));
-app.listen(port, () => {
+app.listen(config_file.port, () => {
   console.log(`server is running on port ${port}`);
 });
