@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
-const verifyJWT = async (req, res, next) => {
+const handler = {};
+handler.verifyJWT = async (req, res, next) => {
   console.log("coll jwt");
   const token = req.header("authorisation");
   if (!token) {
@@ -22,3 +23,5 @@ const verifyJWT = async (req, res, next) => {
     res.status(404).send({ message: "Not Found" });
   }
 };
+
+module.exports = handler;

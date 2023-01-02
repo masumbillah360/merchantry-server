@@ -8,6 +8,7 @@ const categoriesHandler = require("./files/handler/categoryHandler");
 const paymentHandler = require("./files/handler/paymentHandler");
 const sellersProductsHandler = require("./files/handler/sellersProductsHandler");
 const wishlistHandler = require("./files/handler/wishlistHandler");
+const authorisationHandler = require("./files/handler/jwtHandler");
 
 const app = express();
 // configure file
@@ -21,6 +22,8 @@ app.use(express.json());
 
 const apiRunner = async () => {
   try {
+    // authorisations users
+    app.use("jwt", authorisationHandler);
     // users route
     app.use("/users", usersHandler);
 
