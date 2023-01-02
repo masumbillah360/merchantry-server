@@ -7,6 +7,7 @@ const productsHandler = require("./files/handler/productsHandler");
 const categoriesHandler = require("./files/handler/categoryHandler");
 const paymentHandler = require("./files/handler/paymentHandler");
 const sellersProductsHandler = require("./files/handler/sellersProductsHandler");
+const wishlistHandler = require("./files/handler/wishlistHandler");
 
 const app = express();
 // configure file
@@ -37,6 +38,9 @@ const apiRunner = async () => {
 
     // sellers products route handler
     app.use("/seller", sellersProductsHandler);
+
+    // wishlist route handler
+    app.use("/wishlist", wishlistHandler);
   } catch (error) {}
 };
 
