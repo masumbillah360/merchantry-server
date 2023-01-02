@@ -1,5 +1,6 @@
 const express = require("express");
 const { bookingCollection } = require("../db_collections/collection");
+const { verifyJWT } = require("../utilities/authorization");
 const router = express.Router();
 
 // post booking data

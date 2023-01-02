@@ -6,6 +6,7 @@ const {
   whishlistCollection,
   bookingCollection,
 } = require("../db_collections/collection");
+const { verifyJWT } = require("../utilities/authorization");
 const router = express.Router();
 const stripe = require("stripe")(process.env.STRIPE_KEY);
 

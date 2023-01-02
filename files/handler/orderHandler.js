@@ -1,5 +1,6 @@
 const express = require("express");
 const { paymentCollection } = require("../db_collections/collection");
+const { verifyJWT } = require("../utilities/authorization");
 const router = express.Router();
 
 router.get("/", verifyJWT, async (req, res) => {

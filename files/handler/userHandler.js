@@ -1,5 +1,6 @@
 const express = require("express");
 const { userCollection } = require("../db_collections/collection");
+const { verifyJWT } = require("../utilities/authorization");
 const router = express.Router();
 router.post("/", async (req, res) => {
   const user = req.body;

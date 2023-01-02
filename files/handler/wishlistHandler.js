@@ -1,4 +1,5 @@
 const express = require("express");
+const { verifyJWT } = require("../utilities/authorization");
 const router = express.Router();
 
 router.post("/", async (req, res) => {
