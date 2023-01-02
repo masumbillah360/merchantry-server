@@ -1,6 +1,16 @@
+const express = require("express");
+const {
+  paymentCollection,
+  productsCollection,
+  sellersProductsCollection,
+  whishlistCollection,
+  bookingCollection,
+} = require("../db_collections/collection");
+const router = express.Router();
 const stripe = require("stripe")(process.env.STRIPE_KEY);
 
-app.post("/create-payment-intent", verifyJWT, async (req, res) => {
+// create payment intent for payment
+router.post("/payment-intent", verifyJWT, async (req, res) => {
   const bookingData = req?.body;
   console.log(bookingData);
   const price = bookingData.presentPrice;
@@ -20,7 +30,9 @@ app.post("/create-payment-intent", verifyJWT, async (req, res) => {
     res.send({ status: "Something went wrong" });
   }
 });
-app.post("/payments", async (req, res) => {
+
+// insert payment information and update paid product
+router.post("/", async (req, res) => {
   const payment = req.body;
   const id = payment?.productId;
   const paymentResult = await paymentCollection.insertOne(payment);
@@ -51,17 +63,23 @@ app.post("/payments", async (req, res) => {
 
   res.send(paymentResult);
 });
-app.get("/payments", verifyJWT, async (req, res) => {
+
+// get payment information
+router.get("/", verifyJWT, async (req, res) => {
   const email = req.query.email;
   console.log(email);
   const query = { userEmail: email };
   const result = await paymentCollection.find(query).toArray();
   res.send(result);
 });
-app.delete("/payments/:transactionId", verifyJWT, async (req, res) => {
+
+// delete payment paid product
+router.delete("/:transactionId", verifyJWT, async (req, res) => {
   const transactionId = req.params.transactionId;
   const query = { transactionId: transactionId };
   const result = await paymentCollection.deleteOne(query);
   res.send(result);
   console.log(result);
 });
+
+module.exports = router;
