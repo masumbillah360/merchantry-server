@@ -6,6 +6,7 @@ const bookingHandler = require("./files/handler/bookingHandler");
 const productsHandler = require("./files/handler/productsHandler");
 const categoriesHandler = require("./files/handler/categoryHandler");
 const paymentHandler = require("./files/handler/paymentHandler");
+const sellersProductsHandler = require("./files/handler/sellersProductsHandler");
 
 const app = express();
 // configure file
@@ -33,6 +34,9 @@ const apiRunner = async () => {
 
     // payment route handler
     app.use("/payment", paymentHandler);
+
+    // sellers products route handler
+    app.use("/seller", sellersProductsHandler);
   } catch (error) {}
 };
 

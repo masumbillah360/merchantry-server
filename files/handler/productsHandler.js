@@ -1,4 +1,11 @@
-app.get("/products", async (req, res) => {
+const express = require("express");
+const {
+  productsCollection,
+  sellersProductsCollection,
+} = require("../db_collections/collection");
+const router = express.Router();
+
+router.get("/", async (req, res) => {
   const query = { paid: { $ne: true } };
   const sellersProductQuery = {
     paid: { $ne: true },
@@ -12,7 +19,7 @@ app.get("/products", async (req, res) => {
   // console.log(sellersProduct);
   res.send(results);
 });
-app.get("/buy-product/:id", async (req, res) => {
+router.get("/buyed/:id", async (req, res) => {
   const id = req.params.id;
   console.log(id);
   const query = { _id: ObjectId(id), paid: { $ne: true } };
@@ -24,7 +31,7 @@ app.get("/buy-product/:id", async (req, res) => {
     res.send(sellersProduct);
   }
 });
-app.get("/products/:id", async (req, res) => {
+router.get("/:id", async (req, res) => {
   const id = req.params.id;
   const query = { _id: ObjectId(id) };
   const result = await productsCollection.findOne(query);
@@ -35,3 +42,5 @@ app.get("/products/:id", async (req, res) => {
     res.send(sellersProduct);
   }
 });
+
+module.exports = router;
