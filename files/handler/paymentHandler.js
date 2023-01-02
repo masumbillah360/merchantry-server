@@ -34,53 +34,63 @@ router.post("/payment-intent", verifyJWT, async (req, res) => {
 
 // insert payment information and update paid product
 router.post("/", async (req, res) => {
-  const payment = req.body;
-  const id = payment?.productId;
-  const paymentResult = await paymentCollection.insertOne(payment);
-  const query = { _id: ObjectId(id) };
-  const result = await productsCollection.findOne(query);
-  const updatedDoc = {
-    $set: {
-      paid: true,
-      transactionId: payment.transactionId,
-    },
-  };
-  if (result) {
-    await productsCollection.updateOne(query, updatedDoc);
-  }
-  const sellersProduct = await sellersProductsCollection.findOne(query);
-  if (sellersProduct) {
-    await sellersProductsCollection.updateOne(query, updatedDoc);
-  }
-  const filter = { productId: id };
-  const wishlistProducts = await whishlistCollection.findOne(filter);
-  if (wishlistProducts) {
-    await whishlistCollection.updateOne(filter, updatedDoc);
-  }
-  const bookedData = await bookingCollection.findOne(filter);
-  if (bookedData) {
-    await bookingCollection.updateOne(filter, updatedDoc);
-  }
+  try {
+    const payment = req.body;
+    const id = payment?.productId;
+    const paymentResult = await paymentCollection.insertOne(payment);
+    const query = { _id: ObjectId(id) };
+    const result = await productsCollection.findOne(query);
+    const updatedDoc = {
+      $set: {
+        paid: true,
+        transactionId: payment.transactionId,
+      },
+    };
+    if (result) {
+      await productsCollection.updateOne(query, updatedDoc);
+    }
+    const sellersProduct = await sellersProductsCollection.findOne(query);
+    if (sellersProduct) {
+      await sellersProductsCollection.updateOne(query, updatedDoc);
+    }
+    const filter = { productId: id };
+    const wishlistProducts = await whishlistCollection.findOne(filter);
+    if (wishlistProducts) {
+      await whishlistCollection.updateOne(filter, updatedDoc);
+    }
+    const bookedData = await bookingCollection.findOne(filter);
+    if (bookedData) {
+      await bookingCollection.updateOne(filter, updatedDoc);
+    }
 
-  res.send(paymentResult);
+    res.send(paymentResult);
+  } catch (error) {
+    res.send({ status: "Something went wrong" });
+  }
 });
 
 // get payment information
 router.get("/", verifyJWT, async (req, res) => {
-  const email = req.query.email;
-  console.log(email);
-  const query = { userEmail: email };
-  const result = await paymentCollection.find(query).toArray();
-  res.send(result);
+  try {
+    const email = req.query.email;
+    const query = { userEmail: email };
+    const result = await paymentCollection.find(query).toArray();
+    res.send(result);
+  } catch (error) {
+    res.send({ status: "Something went wrong" });
+  }
 });
 
 // delete payment paid product
 router.delete("/:transactionId", verifyJWT, async (req, res) => {
-  const transactionId = req.params.transactionId;
-  const query = { transactionId: transactionId };
-  const result = await paymentCollection.deleteOne(query);
-  res.send(result);
-  console.log(result);
+  try {
+    const transactionId = req.params.transactionId;
+    const query = { transactionId: transactionId };
+    const result = await paymentCollection.deleteOne(query);
+    res.send(result);
+  } catch (error) {
+    res.send({ status: "Something went wrong" });
+  }
 });
 
 module.exports = router;

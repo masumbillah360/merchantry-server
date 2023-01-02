@@ -22,33 +22,44 @@ router.get("/", async (req, res) => {
 
 // get booking data by booking id
 router.get("/:id", verifyJWT, async (req, res) => {
-  const id = req.params.id;
-  const query = { productId: id };
-  const result = await bookingCollection.findOne(query);
-  res.send(result);
+  try {
+    const id = req.params.id;
+    const query = { productId: id };
+    const result = await bookingCollection.findOne(query);
+    res.send(result);
+  } catch (error) {
+    res.send({ error: error.message });
+  }
 });
 
 // update booking data by id
 router.put("/:id", verifyJWT, async (req, res) => {
-  const id = req.params.id;
-  console.log(id, "updated Id");
-  const filter = { productId: id };
-  const updatedDoc = {
-    $set: {
-      status: true,
-      paid: true,
-    },
-  };
-  const result = await bookingCollection.updateOne(filter, updatedDoc);
-  res.send(result);
+  try {
+    const id = req.params.id;
+    const filter = { productId: id };
+    const updatedDoc = {
+      $set: {
+        status: true,
+        paid: true,
+      },
+    };
+    const result = await bookingCollection.updateOne(filter, updatedDoc);
+    res.send(result);
+  } catch (error) {
+    res.send({ error: error.message });
+  }
 });
 
 // delete booking data by id
 router.delete("/:id", verifyJWT, async (req, res) => {
-  const id = req.params.id;
-  const filter = { _id: ObjectId(id) };
-  const result = await bookingCollection.deleteOne(filter);
-  res.send(result);
+  try {
+    const id = req.params.id;
+    const filter = { _id: ObjectId(id) };
+    const result = await bookingCollection.deleteOne(filter);
+    res.send(result);
+  } catch (error) {
+    res.send({ error: error.message });
+  }
 });
 
 module.exports = router;

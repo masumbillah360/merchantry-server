@@ -4,17 +4,24 @@ const { verifyJWT } = require("../utilities/authorization");
 const router = express.Router();
 
 router.get("/", verifyJWT, async (req, res) => {
-  const email = req.query.email;
-  console.log(email);
-  const query = { userEmail: email };
-  const result = await paymentCollection.find(query).toArray();
-  res.send(result);
+  try {
+    const email = req.query.email;
+    const query = { userEmail: email };
+    const result = await paymentCollection.find(query).toArray();
+    res.send(result);
+  } catch (error) {
+    res.send({ error: error.message });
+  }
 });
 router.delete("/:id", verifyJWT, async (req, res) => {
-  const id = req.params.id;
-  const query = { _id: ObjectId(id) };
-  const result = await paymentCollection.deleteOne(query);
-  res.send(result);
+  try {
+    const id = req.params.id;
+    const query = { _id: ObjectId(id) };
+    const result = await paymentCollection.deleteOne(query);
+    res.send(result);
+  } catch (error) {
+    res.send({ error: error.message });
+  }
 });
 
 module.exports = router;
